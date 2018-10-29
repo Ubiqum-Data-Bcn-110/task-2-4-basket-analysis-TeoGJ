@@ -1,0 +1,82 @@
+
+
+
+#### Installing packages and importing and labelling data
+```{r}
+library(caret)
+
+install.packages("arules")
+install.packages("arulesViz")
+install.packages("TSP")
+
+library(arules)
+library(arulesViz)
+
+Electronidex <- read.transactions("ElectronidexTransactions2017.csv", sep = ",", format = "basket", rm.duplicates = FALSE)
+
+Categorized<- read.transactions("ElectronidexCustomized.csv", sep = ",", format = "basket")
+
+Electronidex@itemInfo$type <- c("ExternalHD","ExternalHD","Mouse","ExternalHD","ExternalHD","Laptops","Desktop","Monitors","ComputerHeadphone","Laptops","Monitors","ActiveHeadphones","ActiveHeadphones","Laptops","Laptops","Keyboard","SmartHome","Keyboard","Keyboard","Monitors","Laptops","Desktop","Monitors","ComputerCords","Keyboard","Accessories","Speakers","Printers","PrinterInk","Speakers","PrinterInk","Printers","Accessories","Speakers","Desktop","Desktop","Desktop","MouseKeyboard","Laptops","Monitors","Keyboard","Speakers","Printers","PrinterInk","MouseKeyboard","Laptops","PrinterInk","Printers","ComputerCords","ComputerCords","Tablets","SmartHome","ComputerStands","Mouse","Mouse","SmartHome","ComputerStands","ComputerStands","ComputerCords","ComputerCords","ComputerStands","PrinterInk","Desktop","Laptops","Monitors","Laptops","Keyboard","Mouse","Printers","Desktop","Desktop","Tablets","Tablets","ComputerCords","Speakers","ComputerHeadphone","Tablets","ComputerHeadphone","Accessories","Desktop","Monitors","Laptops","Mouse","ComputerHeadphone","MouseKeyboard","Keyboard","MouseKeyboard","MouseKeyboard","MouseKeyboard","Speakers","ComputerHeadphone","Keyboard","Mouse","Speakers","Mouse","ComputerHeadphone","Accessories","MouseKeyboard","MouseKeyboard","ActiveHeadphones","ComputerStands","ActiveHeadphones","ActiveHeadphones","ComputerHeadphone","ComputerHeadphone","ActiveHeadphones","Mouse","MouseKeyboard","Keyboard","Speakers","SmartHome","ComputerCords","Tablets","Monitors","Monitors","ExternalHD","Mouse","SmartHome","Speakers","ComputerCords","ComputerCords","Monitors","Mouse","ComputerHeadphone","ComputerHeadphone")
+
+
+```
+
+
+#### First dataset explorations
+```{r}
+inspect(head(Electronidex))
+length(Electronidex)
+size(Electronidex)
+LIST(Electronidex)
+itemLabels(Electronidex)
+
+
+
+itemFrequencyPlot(Electronidex, topN = 15)
+itemFrequencyPlot(Categorized, topN = 18)
+
+image(Electronidex)
+
+image(sample(Electronidex, 100, col = topo.colors(20,Pastel2)))
+```
+
+#### Looking for rules and checking its performance
+```{r}
+
+## Rules by most sold product types
+str(Electronidex)
+ProductTypes<- aggregate(Electronidex, by = "type")
+str(ProductTypes)
+
+
+RulesTypes1 <- apriori(ProductTypes, parameter=list(supp=0.01, conf=0.01), appearance = list(rhs=c("Accessories", "ActiveHeadphones", "ComputerCords", "ComputerHeadphone", "ComputerStands", "ExternalHD", "Keyboard", "Monitors","Mouse","MouseKeyboard", "PrinterInk", "Printers", "SmartHome", "Speakers", "Tablets")))
+inspect(sort(RulesTypes1, by = "confidence")[1:10])
+inspect(sort(RulesTypes1, by = "lift")[1:10])
+
+RulesTypes2 <- apriori(ProductTypes, parameter=list(supp=0.01, conf=0.01), appearance = list(lhs="Laptops"))
+inspect(sort(RulesTypes2, by = "confidence")[1:10])
+inspect(sort(RulesTypes2, by = "lift")[1:10])
+
+RulesTypes3 <- apriori(ProductTypes, parameter=list(supp=0.01, conf=0.01), appearance = list(lhs="Desktop"))
+inspect(sort(RulesTypes3, by = "confidence")[1:10])
+inspect(sort(RulesTypes3, by = "lift")[1:10])
+
+```
+
+```{r}
+
+## Rules by most sold items
+
+RulesItems1<- apriori(Electronidex, parameter=list(supp=0.01, conf=0.01), appearance = list(lhs=c("iMac")))
+inspect(sort(RulesItems1, by = "confidence")[1:10])
+inspect(sort(RulesItems1, by = "lift")[1:10])
+
+RulesItems2<- apriori(Electronidex, parameter=list(supp=0.01, conf=0.01), appearance = list(lhs=c("HP Laptop")))
+inspect(sort(RulesItems2, by = "confidence")[1:10])
+inspect(sort(RulesItems2, by = "lift")[1:10])
+
+RulesItems3<- apriori(Electronidex, parameter=list(supp=0.01, conf=0.01), appearance = list(lhs=c("CYBERPOWER Gamer Desktop")))
+inspect(sort(RulesItems3, by = "confidence")[1:10])
+inspect(sort(RulesItems3, by = "lift")[1:10])
+
+```
